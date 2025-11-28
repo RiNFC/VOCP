@@ -19,6 +19,7 @@ root.title("Ri's Chatbox")
 root.geometry("200x125")
 root.config(bg="black")
 root.iconbitmap("bin/icon.ico")
+root.attributes('-topmost', True) 
 
 
 label = tk.Label(root, text="", fg="yellow")

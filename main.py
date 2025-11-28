@@ -4,12 +4,9 @@ import GPUtil
 import dotenv
 import os
 import random
+import subprocess  # <-- needed for the modification
 
 dotenv.load_dotenv()
-
-gpus = GPUtil.getGPUs()
-gpu = gpus[0]
-    
 
 ip = "127.0.0.1"
 port = 9000
@@ -26,9 +23,6 @@ REDIRECT_URI = "http://127.0.0.1:8888/callback"
 
 def insert_string_at_index(original_string, string_to_insert, index):
     return original_string[:index] + string_to_insert + original_string[index:]
-
-def clearchatbox():
-    client.send_message("/chatbox/input", ["", True, False])
 
 def get_current_spotify_song():
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -50,6 +44,31 @@ def get_current_spotify_song():
         "is_playing": current["is_playing"]
     }
 
+
+# I have No idea what I am doing here but It Kinda Works
+def get_gpu_status_no_popup():
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=index,name,memory.total,memory.used,utilization.gpu",
+             "--format=csv,noheader,nounits"],
+            capture_output=True,
+            text=True,
+            creationflags=0x08000000
+        )
+        gpus = []
+        for line in result.stdout.strip().split("\n"):
+            index, name, mem_total, mem_used, load = line.split(", ")
+            gpus.append(
+                type("GPU", (object,), {
+                    "id": int(index),
+                    "name": name,
+                    "memoryTotal": float(mem_total)/1000,
+                    "memoryUsed": float(mem_used)/1000,
+                    "load": float(load)/100
+                })()
+            )
+        print(gpus)
+        return gpus
+
 with open("bin/status.txt", "r", encoding="utf-8") as file:
     content = file.read()
     statmsg = str(content).splitlines()
@@ -58,7 +77,9 @@ with open("bin/emojis.txt", "r", encoding="utf-8") as file:
 
 indexstat = 0
 while True:
-    spotstr = ""
+    gpus = get_gpu_status_no_popup()
+    gpu = gpus[0]
+    spotstr = "⏸️"
     spotifyret = get_current_spotify_song()
     if spotifyret:
         titless = str(spotifyret["title"])
@@ -67,24 +88,20 @@ while True:
         spotemoji = "⏸️"
         if spotifyret["is_playing"]:
             spotemoji = "🎵"
-        spotstr = f"{spotemoji} {titless.split("[]]\-=")[0]} ᵇʸ {spotifyret["artist"]}"
+        spotstr = f"{spotemoji} {titless.split('[]]\-=')[0]} ᵇʸ {spotifyret['artist']}"
 
-    
-
-    
-    try: statstr = f"{random.choice(emojis)} {statmsg[indexstat]}"
+    try: 
+        statstr = f"{random.choice(emojis)} {statmsg[indexstat]}"
     except IndexError: 
         indexstat = 0
         statstr = f"{random.choice(emojis)} {statmsg[indexstat]}"
 
-    gpustat = f"ᵍᵖᵘ {int(gpu.load*100)}% ¦ᵛʳᵃᵐ {round(gpu.memoryUsed / 1000, 1)}/{round(gpu.memoryTotal / 1000, 1)}Gb"
+    gpustat = f"ᵍᵖᵘ {int(gpu.load*100)}% ¦ᵛʳᵃᵐ {round(gpu.memoryUsed, 1 )}/{round(gpu.memoryTotal, 1)}Gb"
 
     with open("bin/chatboxcontent", "r", encoding="utf-8") as file:
         chatbox = file.read()
 
-    endstr = f"{statstr}\n{spotstr}\n{gpustat}\n{chatbox}"
-    
-
+    endstr = f"{statstr}\n{gpustat}\n{spotstr}\n{chatbox}"
 
     client.send_message("/chatbox/input", [endstr, True, False])
     with open("bin/chatboxcurrent", "w", encoding="utf-8") as file:
