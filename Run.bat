@@ -1,3 +1,3 @@
 @echo off
-start "" pythonw chat.py
+start "" pythonw Chat.py
 exit
