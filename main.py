@@ -1,10 +1,10 @@
 from pythonosc.udp_client import SimpleUDPClient
 import time
-import GPUtil
 import dotenv
 import os
 import random
-import subprocess  # <-- needed for the modification
+import subprocess
+import datetime
 
 dotenv.load_dotenv()
 
@@ -17,12 +17,20 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 
+
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = "http://127.0.0.1:8888/callback"
 
 def insert_string_at_index(original_string, string_to_insert, index):
     return original_string[:index] + string_to_insert + original_string[index:]
+
+# https://www.reddit.com/r/learnpython/comments/2gpckp/comment/ckl9z9f
+# Was too lazy to make my own.
+def secondsToTime(seconds):
+	minutes, seconds = divmod(seconds, 60)
+	hours, minutes = divmod(minutes, 60)
+	return "%d:%d:%d" % (hours, minutes, seconds)
 
 def get_current_spotify_song():
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
@@ -75,6 +83,7 @@ with open("bin/status.txt", "r", encoding="utf-8") as file:
 with open("bin/emojis.txt", "r", encoding="utf-8") as file:
     emojis = file.read().split(",")
 
+afkbin = False
 indexstat = 0
 while True:
     gpus = get_gpu_status_no_popup()
@@ -95,6 +104,17 @@ while True:
     except IndexError: 
         indexstat = 0
         statstr = f"{random.choice(emojis)} {statmsg[indexstat]}"
+
+    with open("bin/afk", "r") as file:
+        if file.read() == "False": afk = False
+        else: afk = True
+    
+    if afk:
+        if not afkbin:
+            start_time = time.time()
+            afkbin = True
+        statstr = f"💤 ᶜᵘʳʳᵉⁿᵗˡʸ ᵃᶠᵏ ᶠᵒʳ {secondsToTime(time.time() - start_time)}"
+    else: afkbin = False
 
     gpustat = f"ᵍᵖᵘ {int(gpu.load*100)}% ¦ᵛʳᵃᵐ {round(gpu.memoryUsed, 1 )}/{round(gpu.memoryTotal, 1)}Gb"
 

@@ -14,9 +14,19 @@ def on_input_change(*args):
         file.write(current_text)
 
 
+
+def afk_toggle():
+    with open("bin/afk", "r+") as file:
+        if file.read() == "False": 
+            file.seek(0)
+            file.write("True")
+        else: 
+            file.seek(0)
+            file.write("False")
+
 root = tk.Tk()
 root.title("Ri's Chatbox")
-root.geometry("200x125")
+root.geometry("200x150")
 root.config(bg="black")
 root.iconbitmap("bin/icon.ico")
 root.attributes('-topmost', True) 
@@ -36,6 +46,8 @@ def update_label():
 entry_var = tk.StringVar()
 entry_var.trace_add("write", on_input_change)
 
+afkbutton = tk.Button(root, text="AFK", bg="black", fg="yellow", command=afk_toggle)
+afkbutton.pack(pady=0)
 
 entry = tk.Entry(root, textvariable=entry_var, width=30)
 entry.pack(pady=10)
