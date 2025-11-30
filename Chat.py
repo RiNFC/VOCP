@@ -26,7 +26,7 @@ def afk_toggle():
 
 root = tk.Tk()
 root.title("Ri's Chatbox")
-root.geometry("200x150")
+root.geometry("200x160")
 root.config(bg="black")
 root.iconbitmap("bin/icon.ico")
 root.attributes('-topmost', True) 
@@ -50,7 +50,7 @@ afkbutton = tk.Button(root, text="AFK", bg="black", fg="yellow", command=afk_tog
 afkbutton.pack(pady=0)
 
 entry = tk.Entry(root, textvariable=entry_var, width=30)
-entry.pack(pady=10)
+entry.pack(pady=7)
 entry.config(bg="black", fg="yellow")
 
 update_label()

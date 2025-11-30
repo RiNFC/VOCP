@@ -16,7 +16,7 @@ client = SimpleUDPClient(ip, port)
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-
+core_start = time.time()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
@@ -74,12 +74,12 @@ def get_gpu_status_no_popup():
                     "load": float(load)/100
                 })()
             )
-        print(gpus)
         return gpus
 
 with open("bin/status.txt", "r", encoding="utf-8") as file:
     content = file.read()
     statmsg = str(content).splitlines()
+    
 with open("bin/emojis.txt", "r", encoding="utf-8") as file:
     emojis = file.read().split(",")
 
@@ -116,12 +116,16 @@ while True:
         statstr = f"💤 ᶜᵘʳʳᵉⁿᵗˡʸ ᵃᶠᵏ ᶠᵒʳ {secondsToTime(time.time() - start_time)}"
     else: afkbin = False
 
-    gpustat = f"ᵍᵖᵘ {int(gpu.load*100)}% ¦ᵛʳᵃᵐ {round(gpu.memoryUsed, 1 )}/{round(gpu.memoryTotal, 1)}Gb"
+    gpustat = f"ᵍᵖᵘ {int(gpu.load*100)}% ¦ ᵛʳᵃᵐ {round(gpu.memoryUsed, 1 )}/{round(gpu.memoryTotal, 1)}Gb"
 
     with open("bin/chatboxcontent", "r", encoding="utf-8") as file:
         chatbox = file.read()
 
-    endstr = f"{statstr}\n{gpustat}\n{spotstr}\n{chatbox}"
+
+    timestr = f"⏱️ ᴾˡᵃʸ ᵀᶦᵐᵉ {secondsToTime(time.time() - core_start)}"
+
+
+    endstr = f"{statstr}\n{gpustat}\n{timestr}\n{spotstr}\n{chatbox}"
 
     client.send_message("/chatbox/input", [endstr, True, False])
     with open("bin/chatboxcurrent", "w", encoding="utf-8") as file:
