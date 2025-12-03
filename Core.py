@@ -85,6 +85,7 @@ with open("bin/emojis.txt", "r", encoding="utf-8") as file:
 
 afkbin = False
 indexstat = 0
+restindex = 0
 while True:
     gpus = get_gpu_status_no_popup()
     gpu = gpus[0]
@@ -128,6 +129,12 @@ while True:
     endstr = f"{statstr}\n{gpustat}\n{timestr}\n{spotstr}\n{chatbox}"
 
     client.send_message("/chatbox/input", [endstr, True, False])
+    if restindex >= 100: 
+        client._sock.close()
+        client = SimpleUDPClient(ip, port)
+        restindex = 0
+
+    restindex += 1
     with open("bin/chatboxcurrent", "w", encoding="utf-8") as file:
         file.write(endstr)
     indexstat += 1
