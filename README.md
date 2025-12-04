@@ -1,5 +1,8 @@
 ## VRChat OSC Chatbox Python
 
+This is NOT an alternative to tools like MagicChatbox, This does not have any customization besides status messages, this is simply a tool for me to use since I don't like the bloatware which MagicChatbox contains.
+
+
 All Status messages go in ```bin\status.txt```, seperate by Skip Line.
 
 All Emojis go in ```bin\emojis.txt```, Seperate by ```,```
