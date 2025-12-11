@@ -1,4 +1,0 @@
-C:\Users\Ri\Documents\VOCP\main.py:66: SyntaxWarning: invalid escape sequence '\-'
-  titless = insert_string_at_index(str(spotifyret["title"]), "...[]]\-=", 17)
-C:\Users\Ri\Documents\VOCP\main.py:70: SyntaxWarning: invalid escape sequence '\-'
-  spotstr = f"{spotemoji} {titless.split("[]]\-=")[0]} \u1d47\u02b8 {spotifyret["artist"]}"
