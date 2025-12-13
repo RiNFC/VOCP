@@ -1,4 +1,4 @@
-C:\Users\Ri\Documents\VOCP\Coffee\Core.py:148: SyntaxWarning: invalid escape sequence '\-'
+C:\Users\Ri\Documents\VOCP\Coffee\Core.py:126: SyntaxWarning: invalid escape sequence '\-'
   titless = insert_string_at_index(str(spotifyret["title"]), "...[]]\-=", 17)
-C:\Users\Ri\Documents\VOCP\Coffee\Core.py:152: SyntaxWarning: invalid escape sequence '\-'
+C:\Users\Ri\Documents\VOCP\Coffee\Core.py:130: SyntaxWarning: invalid escape sequence '\-'
   spotstr = f"{spotemoji} {titless.split('[]]\-=')[0]} \u1d47\u02b8 {spotifyret['artist']}\n{progressbar(spotifyret["progress"], spotifyret["duration"])}"

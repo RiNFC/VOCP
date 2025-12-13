@@ -104,28 +104,7 @@ def progressbar(progress, duration):
     return(f"{progstr} {barstr} {durastr}")
 
 
-# I have No idea what I am doing here but It Kinda Works
-def get_gpu_status_no_popup():
-        result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=index,name,memory.total,memory.used,utilization.gpu",
-             "--format=csv,noheader,nounits"],
-            capture_output=True,
-            text=True,
-            creationflags=0x08000000
-        )
-        gpus = []
-        for line in result.stdout.strip().split("\n"):
-            index, name, mem_total, mem_used, load = line.split(", ")
-            gpus.append(
-                type("GPU", (object,), {
-                    "id": int(index),
-                    "name": name,
-                    "memoryTotal": float(mem_total)/1000,
-                    "memoryUsed": float(mem_used)/1000,
-                    "load": float(load)/100
-                })()
-            )
-        return gpus
+
 
 with open("bin/status.txt", "r", encoding="utf-8") as file:
     content = file.read()
@@ -137,9 +116,8 @@ with open("bin/emojis.txt", "r", encoding="utf-8") as file:
 afkbin = False
 indexstat = 0
 restindex = 0
+statchangeindex = 0
 while True:
-    gpus = get_gpu_status_no_popup()
-    gpu = gpus[0]
     spotstr = "⏸️"
     spotifyret = get_current_spotify_song()
     if spotifyret:
@@ -151,29 +129,32 @@ while True:
             spotemoji = "🎵"
         spotstr = f"{spotemoji} {titless.split('[]]\-=')[0]} ᵇʸ {spotifyret['artist']}\n{progressbar(spotifyret["progress"], spotifyret["duration"])}"
         
-    try: mainstat = statmsg[indexstat]
-    except IndexError: indexstat = 0
+    if statchangeindex == 0:
+        try: mainstat = statmsg[indexstat]
+        except IndexError: indexstat = 0
     
-    txtindex = 0
-    txtlimreached = False
-    newerstatmsg = ""
-    if len(mainstat) > 23:
-        basestat = mainstat.split()
-        for txt in basestat:
-            newerstatmsg = newerstatmsg + txt + " "
-            if not txtlimreached:
-                for c in txt:
-                    txtindex += 1
-                    if txtindex == 23:
-                        txtlimreached = True
-                        newerstatmsg = newerstatmsg + "\n"
+        txtindex = 0
+        txtlimreached = False
+        newerstatmsg = ""
+        if len(mainstat) > 23:
+            basestat = mainstat.split()
+            for txt in basestat:
+                newerstatmsg = newerstatmsg + txt + " "
+                if not txtlimreached:
+                    for c in txt:
+                        txtindex += 1
+                        if txtindex == 23:
+                            txtlimreached = True
+                            newerstatmsg = newerstatmsg + "\n"
 
-                    continue
-    
-    if txtlimreached:
-        mainstat = newerstatmsg
-    
-        statstr = f"{random.choice(emojis)} {mainstat}"
+                        continue
+        if len(mainstat) <= 23: 
+            oldstatstr = f"{random.choice(emojis)} {statmsg[indexstat]}"
+            statstr = f"{random.choice(emojis)} {mainstat}"
+        if txtlimreached:
+            mainstat = newerstatmsg
+            oldstatstr = f"{random.choice(emojis)} {statmsg[indexstat]}"
+            statstr = f"{random.choice(emojis)} {mainstat}"
 
     with open("bin/afk", "r") as file:
         if file.read() == "False": afk = False
@@ -186,7 +167,6 @@ while True:
         statstr = f"☕ ᶜᵘʳʳᵉⁿᵗˡʸ ᵃᶠᵏ ᶠᵒʳ {secondsToTime(time.time() - start_time)}"
     else: afkbin = False
 
-    gpustat = f"ᵍᵖᵘ {int(gpu.load*100)}% ¦ ᵛʳᵃᵐ {round(gpu.memoryUsed, 1 )}/{round(gpu.memoryTotal, 1)}Gb"
 
     with open("bin/chatboxcontent", "r", encoding="utf-8") as file:
         chatbox = file.read()
@@ -196,12 +176,14 @@ while True:
     if hour / 12 >= 1:
         adj = "PM"
         hour -= 12
-    else: adj = "AM"
+    else: 
+        adj = "AM"
+        hour = 12
 
-    timestr = f"ᶜᵘʳʳᵉⁿᵗ ᵀᶦᵐᵉ:\n{f"{hour}:{localtime.tm_min:02d} {adj}".center(3)}"
+    timestr = f"{f"{hour}:{localtime.tm_min:02d} {adj}".center(3)}"
 
 
-    endstr = f"{statstr}\n{timestr}\n{spotstr}\n{chatbox}"
+    endstr = f"{oldstatstr}\n{timestr}\n{spotstr}\n{chatbox}"
 
     client.send_message("/chatbox/input", [endstr, True, False])
     if restindex >= 100: 
@@ -211,7 +193,10 @@ while True:
 
     restindex += 1
     with open("bin/chatboxcurrent", "w", encoding="utf-8") as file:
-        file.write(endstr)
-    indexstat += 1
+        file.write(f"{statstr}\n{timestr}\n{spotstr}\n{chatbox}")
+    statchangeindex += 1
+    if statchangeindex >= 3: 
+        statchangeindex = 0
+        indexstat += 1
 
     time.sleep(2)
